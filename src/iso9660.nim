@@ -39,6 +39,24 @@ type
     identifier*: array[5, byte]
     version*: byte  
 
+proc UnMarshalBinary(vdh: var VolumeDescriptorHeader, data: seq[byte]): void =
+  if len(data) < 7:
+    raise newException(EOFError, "Unexpected EOF")
+
+  vdh.volume_type = data[0]
+  vdh.identifier = data[1 .. 5]
+  vdh.version = data[6]
+
+proc MarshalBinary(vdh: var VolumeDescriptorHeader): seq[byte] =
+  var data:seq[byte] = newSeq[byte](7)
+  data[0] = vdh.volume_type
+  data[6] = vdh.version
+  for i in 1 .. 6:
+    data[i] = vdh.identifier[i-1]
+  
+  return data
+
+type
   # RecordingTimeStamp represents a time and date format
   # that can be encoded according to ECMA-119 9.1.5
   RecordingTimeStamp* = Time
@@ -69,6 +87,16 @@ type
     identifier*:  string
     systemUse*: seq[byte]
 
+# proc UnMarshalBinary(de: var DirectoryEntry, data: seq[byte]):void =
+#   let length = data[0]
+#   if length == 0:
+#     raise newException(EOFError, "Unexpected EOF")
+
+#   de.extendedAttributeRecordLength = data[1]
+
+#   if de.extentLocation = 
+
+type
   # BootVolumeDescriptorBody represents the data in bytes 7-2047
   # Of a Boot Record as defined in ECMA-119 8.2
   BootVolumeDescriptorBody* = object
@@ -107,19 +135,3 @@ type
     applicationUsed*: array[512, byte]
 
 
-proc UnMarshalBinary(vdh: var VolumeDescriptorHeader, data: seq[byte]): void =
-  if len(data) < 7:
-    raise EOFError
-
-  vdh.volume_type = data[0]
-  vdh.identifier = data[1:6]
-  vdh.version = data[6]
-
-proc MarshalBinary(vdh: var VolumeDescriptorHeader): seq[byte] =
-  var data:seq[byte] = newSeq[byte](7)
-  data[0] = vdh.volume_type
-  data[6] = vdh.version
-  for i in 1 .. 6:
-    data[i] = vdh.identifier[i-1]
-  
-  return data
