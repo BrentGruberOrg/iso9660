@@ -3,10 +3,12 @@ type
   # of a Volume Descriptor as defined in ECMA-119 8.1
   VolumeDescriptorHeader* = object
     volume_type*: byte
-    identifier*: array[5, byte]
+    # TODO: we know the length at compile time, could use an array for optimization
+    # however, need to figure out to convert sub sequence to fixed array
+    identifier*: seq[byte] 
     version*: byte  
 
-proc UnMarshalBinary(vdh: var VolumeDescriptorHeader, data: seq[byte]): void =
+proc UnMarshalBinary*(vdh: var VolumeDescriptorHeader, data: seq[byte]): void =
   if len(data) < 7:
     raise newException(EOFError, "Unexpected EOF")
 
@@ -14,7 +16,7 @@ proc UnMarshalBinary(vdh: var VolumeDescriptorHeader, data: seq[byte]): void =
   vdh.identifier = data[1 .. 5]
   vdh.version = data[6]
 
-proc MarshalBinary(vdh: var VolumeDescriptorHeader): seq[byte] =
+proc MarshalBinary*(vdh: var VolumeDescriptorHeader): seq[byte] =
   var data:seq[byte] = newSeq[byte](7)
   data[0] = vdh.volume_type
   data[6] = vdh.version
