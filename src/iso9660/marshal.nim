@@ -9,6 +9,10 @@ type
     EndianMismatch* = object of ValueError
     LengthError* = object of ValueError
 
+proc toString*(bytes: openarray[byte]): string =
+    result = newString(bytes.len)
+    copyMem(result[0].addr, bytes[0].unsafeAddr, bytes.len)
+
 # MarshalString encodes the given string as a byte array padded to the given length
 proc MarshalString*(s: string, padToLength: int): seq[byte] =
     if padToLength < 0:
