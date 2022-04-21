@@ -1,13 +1,12 @@
 import std/strutils
 import std/strformat
 
+import consts
 import de
 import vdts
 import ../marshal
 import ../endians2
 
-const
-  sectorSize*: uint32 = 2048
 
 type
     # PrimaryVolumeDescriptorBody represents the data in bytes 7-2047
@@ -65,7 +64,7 @@ proc UnmarshalPVDB*(data: seq[byte]): PrimaryVolumeDescriptorBody =
 
     pvdb.volumeSetIdentifier = toString(data[190 .. 317]).strip(leading=false)
     pvdb.publisherIdentifier = toString(data[318 .. 445]).strip(leading=false)
-    pvdb.dataPreparerIdentifier = toString(data[445 .. 573]).strip(leading=false)
+    pvdb.dataPreparerIdentifier = toString(data[446 .. 573]).strip(leading=false)
     pvdb.applicationIdentifier = toString(data[574 .. 701]).strip(leading=false)
     pvdb.copyrightFileIdentifier = toString(data[702 .. 739]).strip(leading=false)
     pvdb.abstractFileIdentifier = toString(data[740 .. 775]).strip(leading=false)
@@ -85,11 +84,8 @@ proc UnmarshalPVDB*(data: seq[byte]): PrimaryVolumeDescriptorBody =
 proc MarshalPVDB*(pvdb: PrimaryVolumeDescriptorBody): seq[byte] =
     var data: seq[byte] = newSeq[byte](sectorSize)
 
-    var d = MarshalString(pvdb.systemIdentifier, 32)
-    copyMem(data[8].addr, d.unsafeAddr, 32)
-
-    d = MarshalString(pvdb.volumeIdentifier, 32)
-    copyMem(data[40].addr, d.unsafeAddr, 32)
+    data[8 .. 39]= MarshalString(pvdb.systemIdentifier, 32)
+    data[40 .. 71] = MarshalString(pvdb.volumeIdentifier, 32)
 
     data[80 .. 87] = MarshalInt32LSBMSB(pvdb.volumeSpaceSize)
     data[120 .. 123] = MarshalInt16LSBMSB(pvdb.volumeSetSize)
