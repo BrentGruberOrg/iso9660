@@ -149,7 +149,7 @@ func fromBytes*(
 
 func fromBytesBE*(
     T: typedesc[SomeEndianInt],
-    x: openArray[byte]): T {.inline.} 
+    x: openArray[byte]): T {.inline.} =
   ## Read big endian bytes and convert to an integer. At runtime, v must contain
   ## at least sizeof(T) bytes. By default, native endianness is used which is
   ## not portable!

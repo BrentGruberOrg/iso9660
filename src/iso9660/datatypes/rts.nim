@@ -44,7 +44,7 @@ func monthtoint(month: Month): int =
 
 # UnmarshalBinary decodes a RecordingTimestamp from binary form
 # TODO: handle date not specified as noted int 9.1.5, when all values are 0
-proc UnMarshalBinary*(ts: var RecordingTimeStamp, data: seq[byte]): RecordingTimeStamp =
+proc UnMarshalRTS*(data: seq[byte]): RecordingTimeStamp =
     if len(data) < 7:
         raise newException(EOFError, "Received too few bytes to unmarshal recording timestamp")
     if len(data) > 8:
@@ -59,8 +59,14 @@ proc UnMarshalBinary*(ts: var RecordingTimeStamp, data: seq[byte]): RecordingTim
 
     # Offset from Greenwich Mean Time in number of 15 min
     # intervals from -48 (West) to +52 (East) recorded according to 7.1.2
-    let tzOffset: int = int(data[6])
+    let tzOffset: int = int(data[6]) - 48
     let secondsInAQuarter: int = 60 * 15
+
+    echo "TZ Offset"
+    echo tzOffset
+    echo "SecondsInQuarter"
+    echo secondsInAQuarter
+    echo tzOffset * secondsInAQuarter
 
     var retval: RecordingTimestamp = initDateTime(
         year=year,
@@ -75,18 +81,26 @@ proc UnMarshalBinary*(ts: var RecordingTimeStamp, data: seq[byte]): RecordingTim
 
 # MarshalBinary encodes the RecordingTimestamp in its binary form
 # to a buffer of the length of 7 or more bytes
-proc MarshalBinary(rst: RecordingTimeStamp): seq[byte] =
+proc MarshalRTS*(rts: RecordingTimeStamp): seq[byte] =
     var retval: seq[byte] = newSeq[byte](7) # Should this be a seq or array?
 
-    let secondsInAQuarter = 60 * 15
-    let offsetInQuarters = rst.utcOffset / secondsInAQuarter
+    echo "marshal utcoffset"
+    echo rts.utcOffset
 
-    retval[0] = byte(rst.year)
-    retval[1] = byte(monthtoint(rst.month))
-    retval[2] = byte(rst.monthday)
-    retval[3] = byte(rst.hour)
-    retval[4] = byte(rst.minute)
-    retval[5] = byte(rst.second)
+    let secondsInAQuarter = 60 * 15
+
+    # Add 48 during marshaling to deal with negative
+    let offsetInQuarters = (rts.utcOffset / secondsInAQuarter) + 48
+
+    echo "offsetinquarters"
+    echo offsetInQuarters 
+
+    retval[0] = byte(rts.year - 1900)
+    retval[1] = byte(monthtoint(rts.month))
+    retval[2] = byte(rts.monthday)
+    retval[3] = byte(rts.hour)
+    retval[4] = byte(rts.minute)
+    retval[5] = byte(rts.second)
     retval[6] = byte(offsetInQuarters)
 
     return retval

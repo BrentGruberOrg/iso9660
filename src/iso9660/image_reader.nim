@@ -1,9 +1,9 @@
 
 
-type
-  ImageReader* = object
-    ra*: string
+# type
+#   ImageReader* = object
+#     # *: string
 
-proc initSubmodule*(): Submodule =
-  ## Initialises a new ``Submodule`` object.
-  Submodule(name: "Anonymous")
+# proc initSubmodule*(): Submodule =
+#   ## Initialises a new ``Submodule`` object.
+#   Submodule(name: "Anonymous")
