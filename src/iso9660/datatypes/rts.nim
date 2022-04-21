@@ -62,12 +62,6 @@ proc UnMarshalRTS*(data: seq[byte]): RecordingTimeStamp =
     let tzOffset: int = int(data[6]) - 48
     let secondsInAQuarter: int = 60 * 15
 
-    echo "TZ Offset"
-    echo tzOffset
-    echo "SecondsInQuarter"
-    echo secondsInAQuarter
-    echo tzOffset * secondsInAQuarter
-
     var retval: RecordingTimestamp = initDateTime(
         year=year,
         month=inttomonth(month),
@@ -84,16 +78,10 @@ proc UnMarshalRTS*(data: seq[byte]): RecordingTimeStamp =
 proc MarshalRTS*(rts: RecordingTimeStamp): seq[byte] =
     var retval: seq[byte] = newSeq[byte](7) # Should this be a seq or array?
 
-    echo "marshal utcoffset"
-    echo rts.utcOffset
-
     let secondsInAQuarter = 60 * 15
 
     # Add 48 during marshaling to deal with negative
     let offsetInQuarters = (rts.utcOffset / secondsInAQuarter) + 48
-
-    echo "offsetinquarters"
-    echo offsetInQuarters 
 
     retval[0] = byte(rts.year - 1900)
     retval[1] = byte(monthtoint(rts.month))

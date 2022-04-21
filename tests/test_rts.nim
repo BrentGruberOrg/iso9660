@@ -75,6 +75,7 @@ suite "Recording Time Stamp":
 
         let unmarshalled: RecordingTimeStamp = UnMarshalRTS(marshalled)
 
+        # TODO: need to look into nim, how does == work with custom types, in this case DateTime?
         check:
             unmarshalled.year == data.year
             unmarshalled.month == data.month

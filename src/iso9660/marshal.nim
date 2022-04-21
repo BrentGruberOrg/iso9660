@@ -6,8 +6,8 @@ import std/sequtils
 # TODO: Can this be made as functional instead of procs?
 
 type
-    EndianMismatch* = object of Exception
-    LengthError* = object of Exception
+    EndianMismatch* = object of ValueError
+    LengthError* = object of ValueError
 
 # MarshalString encodes the given string as a byte array padded to the given length
 proc MarshalString*(s: string, padToLength: int): seq[byte] =
@@ -17,7 +17,7 @@ proc MarshalString*(s: string, padToLength: int): seq[byte] =
     var padded: string = s
     
     if len(s) > padToLength:
-        padded = padded[ .. (padToLength-1) ] # this notation is inclusive
+        padded = padded[0 .. (padToLength-1) ] # this notation is inclusive
     
     var missingPadding = padToLength - len(padded)
 
@@ -66,7 +66,7 @@ proc UnmarshalInt16LSBMSB*(data: seq[byte]): int16 =
 
 # WriteInt32LSBMSB writes a 32-bit integer in both byte orders, as defined in ECMA-119 7.3.3
 #   TODO: can I use fixed arrays instead of seq?
-proc MarshalInt32LSBMSB*(value: var int32): seq[byte] =
+proc MarshalInt32LSBMSB*(value: int32): seq[byte] =
     let le_data: array[4, byte] = toBytesLE(uint32(value))
     let be_data: array[4, byte] = toBytesBE(uint32(value))
 
@@ -75,7 +75,7 @@ proc MarshalInt32LSBMSB*(value: var int32): seq[byte] =
 
 
 # # WriteInt16LSBMSB writes a 16-bit integer in both byte orders, as defined in ECMA-119 7.2.3
-proc MarshalInt16LSBMSB*(value: var int16): seq[byte] =
+proc MarshalInt16LSBMSB*(value: int16): seq[byte] =
     let le_data: array[2, byte] = toBytesLE(uint16(value))
     let be_data: array[2, byte] = toBytesBE(uint16(value))
 
